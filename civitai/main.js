@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         civitai_tools
-// @version      0.1.1
+// @version      0.1.2
 // @namespace    https://github.com/love2wllw/scriptcat_scripts/
 // @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
@@ -36,7 +36,7 @@
         btn.setAttribute("class", "mantine-focus-auto mantine-Text-root");
         btn.setAttribute("data-size", "xs");
         btn.setAttribute("target", "_blank");
-        btn.setAttribute("href", url);
+        btn.setAttribute("href", new_url);
         btn.innerHTML = ico_svg;
         wrap.append(btn);
     }
