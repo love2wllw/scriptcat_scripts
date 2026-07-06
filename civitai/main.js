@@ -1,10 +1,12 @@
 // ==UserScript==
 // @name         civitai_tools
-// @namespace    https://docs.scriptcat.org/
 // @version      0.1.0
-// @description  try to take over the world!
-// @author       You
-// @include      https://civitai.*
+// @namespace    https://github.com/love2wllw/scriptcat_scripts/
+// @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
+// @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
+// @description  my ScriptCat custom scripts
+// @author       ddLee
+// @match        http*://civitai.*
 // @grant        none
 // @noframes
 // ==/UserScript==
