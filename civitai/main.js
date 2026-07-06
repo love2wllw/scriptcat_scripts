@@ -6,7 +6,7 @@
 // @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @description  my ScriptCat custom scripts
 // @author       ddLee
-// @match        http*://civitai.*
+// @include      https://civitai.*
 // @grant        none
 // @noframes
 // ==/UserScript==
