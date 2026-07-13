@@ -42,6 +42,15 @@
     }
 
     function add_post_detail() {
+        const _addBtn = (p) => {
+            const btn = document.createElement("p");
+            btn.setAttribute("style", "color:var(--mantine-color-blue-4)");
+            btn.setAttribute("class", "mantine-focus-auto flex cursor-pointer items-center gap-1 text-xs m_b6d8b162 mantine-Text-root");
+            btn.setAttribute("href", "javascript:;");
+            btn.innerHTML = "<span>复制</span>";
+            p.append(btn);
+            return btn;
+        }
         const nodes = document.querySelectorAll('div[class~="mantine-Card-root"][class~="mantine-Paper-root"]');
         const mainNode = Array.from(nodes).find(x => (x.innerText || "").replace(/\s/g, "").startsWith("Generationdata"));
         if (mainNode) {
@@ -61,6 +70,12 @@
                     otherNode = x;
                 }
             });
+            if (genNode) {
+                const copyBtn = _addBtn(genNode);
+                copyBtn.addEventListener("click", (e) => {
+                    console.log(e.target);
+                });
+            }
             console.log(genNode);
             console.log(resNode);
             console.log(promptNode);
