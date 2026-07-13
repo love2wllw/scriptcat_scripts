@@ -109,7 +109,7 @@
                     if (promptNode) {
                         let promptText = promptNode.querySelectorAll("div.break-words.relative.text-sm")[0]?.innerText || "";
                         promptText = promptText.split("\n")[0];
-                        promptText = promptText.replace(/(<|>)/g, "\$1");
+                        promptText = promptText.replace(/(<|>)/g, "\\$1");
                         resText += `\n> \n> **Prompt**\n> > ${promptText}`;
                     }
                     if (negativeNode) {
