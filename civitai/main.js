@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         civitai_tools
-// @version      0.1.5
+// @version      0.1.6
 // @namespace    https://github.com/love2wllw/scriptcat_scripts/
 // @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
@@ -16,6 +16,16 @@
 
     const S_URL = document.location.href;
     const S_Path = document.location.pathname;
+
+    async function writeClipboardText(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } catch (err) {
+            console.error('写入剪贴板失败:', err);
+            return false;
+        }
+    }
 
     function add_civarchive_button() {
         const new_url = new URL(S_URL);
@@ -57,6 +67,7 @@
             let genNode = null;
             let resNode = null;
             let promptNode = null;
+            let negativeNode = null;
             let otherNode = null;
             mainNode.childNodes.forEach(x => {
                 let innerText = (x.innerText || "").replace(/\s/g, "");
@@ -66,6 +77,8 @@
                     resNode = x;
                 } else if (innerText.startsWith("Prompt")) {
                     promptNode = x;
+                } else if (innerText.startsWith("Negativeprompt")) {
+                    negativeNode = x;
                 } else if (innerText.startsWith("Othermetadata")) {
                     otherNode = x;
                 }
@@ -75,6 +88,7 @@
                 copyBtn.addEventListener("click", (e) => {
                     let resText = "";
                     if (resNode) {
+                        resText += `\n> \n> **Resources used**`;
                         resNode.querySelectorAll("li").forEach(x => {
                             const a = x.querySelector("a");
                             const link = a != null ? a.getAttribute("href") : "";
@@ -86,12 +100,30 @@
                                 modelType = modelType.split("\n")[0];
                             }
                             const modelVer = texts.length > 2 ? texts[2] : "";
-                            resText += `>\n> > [${modelName}](${location.origin}${link}) **${modelType}**`;
+                            resText += `\n> > [${modelName}](${location.origin}${link}) **\`\`${modelType}\`\`**`;
                             if (modelVer) {
                                 resText += `\n> > *${modelVer}*`;
                             }
                         });
                     }
+                    if (promptNode) {
+                        let promptText = promptNode.querySelectorAll("div.break-words.relative.text-sm")[0]?.innerText || "";
+                        promptText = promptText.split("\n")[0];
+                        promptText = promptText.replace(/(<|>)/g, "\$1");
+                        resText += `\n> \n> **Prompt**\n> > ${promptText}`;
+                    }
+                    if (negativeNode) {
+                        let negativeText = negativeNode.querySelectorAll("div.break-words.relative.text-sm")[0]?.innerText || "";
+                        negativeText = negativeText.split("\n")[0];
+                        resText += `\n> \n> **Negative prompt**\n> > ${negativeText}`;
+                    }
+                    if (otherNode) {
+                        resText += `\n> \n> **Other metadata**\n> \n> >`;
+                        otherNode.querySelectorAll("div.mantine-Badge-root").forEach(x => {
+                            resText += ` \`\`${(x.innerText || "").replace("\n", "")}\`\``;
+                        });
+                    }
+                    writeClipboardText(resText);
                     console.log(resText);
                 });
             }
