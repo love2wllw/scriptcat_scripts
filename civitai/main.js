@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         civitai_tools
-// @version      0.1.3
+// @version      0.1.4
 // @namespace    https://github.com/love2wllw/scriptcat_scripts/
 // @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
@@ -73,13 +73,27 @@
             if (genNode) {
                 const copyBtn = _addBtn(genNode);
                 copyBtn.addEventListener("click", (e) => {
-                    console.log(e.target);
+                    if (resNode) {
+                        let resText = "";
+                        resNode.querySelectorAll("li").forEach(x => {
+                            const a = x.querySelector("a");
+                            const link = a != null ? a.getAttribute("href") : "";
+                            const text = x.innerText || "";
+                            const texts = text.split("\n\n");
+                            const modelName = texts.length > 0 ? texts[0] : "";
+                            let modelType = texts.length > 1 ? texts[1] : "";
+                            if (modelType.length > 0) {
+                                modelType = modelType.split("\n")[0];
+                            }
+                            const modelVer = texts.length > 2 ? texts[2] : "";
+                            resText += `>\n> > [${modelName}](${link}) **${modelType}**`;
+                            if (modelVer) {
+                                resText += `\n> > *${modelVer}*`;
+                            }
+                        });
+                    }
                 });
             }
-            console.log(genNode);
-            console.log(resNode);
-            console.log(promptNode);
-            console.log(otherNode);
         }
     }
 
