@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         civitai_tools
-// @version      0.1.2
+// @version      0.1.3
 // @namespace    https://github.com/love2wllw/scriptcat_scripts/
 // @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
@@ -41,9 +41,38 @@
         wrap.append(btn);
     }
 
+    function add_post_detail() {
+        const nodes = document.querySelectorAll('div[class~="mantine-Card-root"][class~="mantine-Paper-root"]');
+        const mainNode = Array.from(nodes).find(x => (x.innerText || "").replace(/\s/g, "").startsWith("Generationdata"));
+        if (mainNode) {
+            let genNode = null;
+            let resNode = null;
+            let promptNode = null;
+            let otherNode = null;
+            mainNode.childNodes.forEach(x => {
+                let innerText = (x.innerText || "").replace(/\s/g, "");
+                if (innerText.startsWith("Generationdata")) {
+                    genNode = x;
+                } else if (innerText.startsWith("Resourcesused")) {
+                    resNode = x;
+                } else if (innerText.startsWith("Prompt")) {
+                    promptNode = x;
+                } else if (innerText.startsWith("Othermetadata")) {
+                    otherNode = x;
+                }
+            });
+            console.log(genNode);
+            console.log(resNode);
+            console.log(promptNode);
+            console.log(otherNode);
+        }
+    }
+
     function loaded() {
         // 添加civarchive.com跳转按钮
         /^\/models\/\d+\/?/.test(S_Path) && add_civarchive_button();
+        // 示例详情页
+        /^\/images\/\d+\/?/.test(S_Path) && add_post_detail();
     }
 
     loaded();
