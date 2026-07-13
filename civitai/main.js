@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         civitai_tools
-// @version      0.1.4
+// @version      0.1.5
 // @namespace    https://github.com/love2wllw/scriptcat_scripts/
 // @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
@@ -50,7 +50,7 @@
             btn.innerHTML = "<span>复制</span>";
             p.append(btn);
             return btn;
-        }
+        };
         const nodes = document.querySelectorAll('div[class~="mantine-Card-root"][class~="mantine-Paper-root"]');
         const mainNode = Array.from(nodes).find(x => (x.innerText || "").replace(/\s/g, "").startsWith("Generationdata"));
         if (mainNode) {
@@ -73,8 +73,8 @@
             if (genNode) {
                 const copyBtn = _addBtn(genNode);
                 copyBtn.addEventListener("click", (e) => {
+                    let resText = "";
                     if (resNode) {
-                        let resText = "";
                         resNode.querySelectorAll("li").forEach(x => {
                             const a = x.querySelector("a");
                             const link = a != null ? a.getAttribute("href") : "";
@@ -86,12 +86,13 @@
                                 modelType = modelType.split("\n")[0];
                             }
                             const modelVer = texts.length > 2 ? texts[2] : "";
-                            resText += `>\n> > [${modelName}](${link}) **${modelType}**`;
+                            resText += `>\n> > [${modelName}](${location.origin}${link}) **${modelType}**`;
                             if (modelVer) {
                                 resText += `\n> > *${modelVer}*`;
                             }
                         });
                     }
+                    console.log(resText);
                 });
             }
         }
