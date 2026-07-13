@@ -88,7 +88,7 @@
                 copyBtn.addEventListener("click", (e) => {
                     let resText = "";
                     if (resNode) {
-                        resText += `\n> \n> **Resources used**`;
+                        resText += `\n> **Resources used**\n> `;
                         resNode.querySelectorAll("li").forEach(x => {
                             const a = x.querySelector("a");
                             const link = a != null ? a.getAttribute("href") : "";
@@ -110,12 +110,12 @@
                         let promptText = promptNode.querySelectorAll("div.break-words.relative.text-sm")[0]?.innerText || "";
                         promptText = promptText.split("\n")[0];
                         promptText = promptText.replace(/(<|>)/g, "\\$1");
-                        resText += `\n> \n> **Prompt**\n> > ${promptText}`;
+                        resText += `\n> \n> **Prompt**\n> \n> > ${promptText}`;
                     }
                     if (negativeNode) {
                         let negativeText = negativeNode.querySelectorAll("div.break-words.relative.text-sm")[0]?.innerText || "";
                         negativeText = negativeText.split("\n")[0];
-                        resText += `\n> \n> **Negative prompt**\n> > ${negativeText}`;
+                        resText += `\n> \n> **Negative prompt**\n> \n> > ${negativeText}`;
                     }
                     if (otherNode) {
                         resText += `\n> \n> **Other metadata**\n> \n> >`;
