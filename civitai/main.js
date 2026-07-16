@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         civitai_tools
-// @version      0.1.9
+// @version      0.1.11
 // @namespace    https://github.com/love2wllw/scriptcat_scripts/
 // @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
@@ -12,12 +12,46 @@
 // @noframes
 // ==/UserScript==
 
+/**
+ * https://sweetalert2.github.io/#examples
+ */
+
 /* global Swal */
 (function () {
     'use strict';
 
     const S_URL = document.location.href;
     const S_Path = document.location.pathname;
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    function getExtensionByMimeType(mimeType) {
+        const map = {
+            'image/jpeg': 'jpg',
+            'image/jpg': 'jpg',
+            'image/png': 'png',
+            'image/gif': 'gif',
+            'image/bmp': 'bmp',
+            'image/webp': 'webp',
+            'image/svg+xml': 'svg',
+            'image/tiff': 'tiff',
+            'image/x-icon': 'ico',
+            'image/vnd.microsoft.icon': 'ico',
+            'image/avif': 'avif',
+            'image/heic': 'heic',
+            'image/heif': 'heif',
+            'image/raw': 'raw',
+            'image/x-raw': 'raw',
+            'image/x-portable-pixmap': 'ppm',
+            'image/x-pcx': 'pcx',
+            'image/x-tga': 'tga',
+            'image/x-rgb': 'rgb',
+            'image/x-pict': 'pict',
+            'image/x-quicktime': 'qtif'
+        };
+        return map[mimeType] || null;
+    }
 
     async function writeClipboardText(text) {
         try {
@@ -29,6 +63,27 @@
             return false;
         }
     }
+
+    async function getHtml(url) {
+        try {
+            const response = await fetch(url, {
+                method: 'GET', headers: {
+                    'Content-Type': 'text/html',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.text();
+        } catch (error) {
+            console.error('请求失败:', error);
+            return null;
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     function add_civarchive_button() {
         const new_url = new URL(S_URL);
@@ -53,6 +108,9 @@
         btn.innerHTML = ico_svg;
         wrap.append(btn);
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     function add_post_detail() {
         const _addBtn = (p) => {
@@ -132,6 +190,9 @@
         }
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     function getPostViewData() {
         return [...document.querySelectorAll(`a.mantine-focus-auto.mantine-Text-root.mantine-Anchor-root`)]
             .filter(x => /\/images\/\d+/i.test(x.href))
@@ -143,14 +204,131 @@
             });
     }
     function add_btn_in_post_view() {
-        const wrap = [...document.querySelectorAll("button.mantine-Button-root.mantine-UnstyledButton-root[data-size='compact-md']")]
-            .find(x => x.innerText == "Save").parentElement;
-        const btn = document.createElement("button");
-        btn.setAttribute("style", "--button-height:var(--button-height-compact-md);--button-padding-x:var(--button-padding-x-compact-md);--button-fz:var(--mantine-font-size-md);--button-radius:var(--mantine-radius-xl);--button-bg:var(--mantine-color-gray-filled);--button-hover:var(--mantine-color-gray-filled-hover);--button-color:var(--mantine-color-white);--button-bd:calc(0.0625rem * var(--mantine-scale)) solid transparent");
-        btn.setAttribute("class", "mantine-focus-auto mantine-active mantine-Button-root mantine-UnstyledButton-root");
-        btn.innerHTML = "<span>保存数据</span>";
-        wrap.append(btn);
+        const _getViewData = () => {
+            return [...document.querySelectorAll(`a.mantine-focus-auto.mantine-Text-root.mantine-Anchor-root`)]
+                .filter(x => /\/images\/\d+/i.test(x.href))
+                .map(x => {
+                    let src = x.querySelector("img").src;
+                    src = /\/\w+\/([\w-]+)\//i.exec(src)[1];
+                    src = `https://image-b2.civitai.com/file/civitai-media-cache/${src}`;
+                    return { href: x.href, src };
+                });
+        };
+        const _addBtn = () => {
+            const wrap = [...document.querySelectorAll("button.mantine-Button-root.mantine-UnstyledButton-root[data-size='compact-md']")].find(x => x.innerText == "Save").parentElement;
+            const btn = document.createElement("button");
+            btn.setAttribute("style", "--button-height:var(--button-height-compact-md);--button-padding-x:var(--button-padding-x-compact-md);--button-fz:var(--mantine-font-size-md);--button-radius:var(--mantine-radius-xl);--button-bg:var(--mantine-color-gray-filled);--button-hover:var(--mantine-color-gray-filled-hover);--button-color:var(--mantine-color-white);--button-bd:calc(0.0625rem * var(--mantine-scale)) solid transparent");
+            btn.setAttribute("class", "mantine-focus-auto mantine-active mantine-Button-root mantine-UnstyledButton-root");
+            btn.innerHTML = "<span class='mantine-Button-inner'><span class='mantine-Button-label'><p class='mantine-focus-auto text-xs mantine-Text-root'>下载</p></span></span>";
+            wrap.append(btn);
+            return btn;
+        };
+        const _getDetail = async (name, item, index) => {
+            let ret = "";
+            if (item) {
+                try {
+                    //console.log(item.href);
+                    const html = await getHtml(item.href);
+                    if (html) {
+                        const jo = JSON.parse(html.match(/<script\s+id="__NEXT_DATA__"\s+type="application\/json">([\s\S]*?)<\/script>/)[1].trim());
+                        const queries = jo["props"]["pageProps"]["trpcState"]["json"]["queries"];
+                        const imgData = queries.find(x => x["queryKey"] && x["queryKey"][0].join("-") == "image-get");
+                        let mimeType = "image/png";
+                        if (imgData && imgData["state"] && imgData["state"]["data"]) {
+                            mimeType = imgData["mimeType"] || "image/png";
+                        }
+                        let ext = getExtensionByMimeType(mimeType);
+                        const genData = queries.find(x => x["queryKey"] && x["queryKey"][0].join("-") == "image-getGenerationData");
+                        if (genData && genData["state"] && genData["state"]["data"]) {
+                            const data = genData["state"]["data"];
+                            const meta = data["meta"];
+                            const resources = data["resources"];
+                            ret = "\n\n***\n\n![img](" + name + "-" + index + "." + ext + ")\n";
+                            ret += "\n> **Resources used**\n>";
+                            if (resources && Array.isArray(resources)) {
+                                resources.forEach(x => {
+                                    const modelId = x["modelId"] || "";
+                                    const modelName = x["modelName"] || "";
+                                    const modelType = x["modelType"] || "";
+                                    const versionName = x["versionName"] || "";
+                                    ret += `\n> > [${modelName}](https://civitai.red/models/${modelId}) **\`\`${modelType}\`\`**`;
+                                    if (versionName) {
+                                        ret += `\n> > *${versionName}*`;
+                                    }
+                                });
+                            }
+                            if (meta) {
+                                let prompt = meta["prompt"] || "";
+                                if (prompt) {
+                                    ret += `\n> \n> **Prompt**\n> \n> > ${prompt}`;
+                                }
+                                let negative = meta["negativePrompt"] || "";
+                                if (negative) {
+                                    negative = negative.replace(/([^\\])([\\[<>\\(\\)\]])/g, "$1\\$2");
+                                    ret += `\n> \n> **Negative prompt**\n> \n> > ${negative}`;
+                                }
+                                ret += "\n> \n> **Other metadata**\n> \n> >";
+                                ret += ` \`\`steps:${(meta["steps"] || "")}\`\``;
+                                ret += ` \`\`cfgScale:${(meta["cfgScale"] || "")}\`\``;
+                                ret += ` \`\`sampler:${(meta["sampler"] || "")}\`\``;
+                                ret += ` \`\`scheduler:${(meta["scheduler"] || "")}\`\``;
+                                ret += ` \`\`denoise:${(meta["denoise"] || "")}\`\``;
+                                ret += ` \`\`seed:${(meta["seed"] || "")}\`\``;
+                                ret += ` \`\`width:${(meta["width"] || "")}\`\``;
+                                ret += ` \`\`height:${(meta["height"] || "")}\`\``;
+                            }
+                            //console.log(ret);
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+            return ret;
+        };
+        const _init = () => {
+            const btn = _addBtn();
+            btn.addEventListener("click", () => {
+
+                Swal.fire({
+                    title: "输入文件名",
+                    input: "text",
+                    inputAttributes: { autocapitalize: "off" },
+                    showCancelButton: true,
+                    confirmButtonText: "确定",
+                    showLoaderOnConfirm: true,
+                    preConfirm: async (name) => {
+                        try {
+
+                            let markdown = "";
+                            let imgs = "";
+                            const viewData = _getViewData();
+                            for (const [index, item] of viewData.entries()) {
+                                imgs += `\n${item.src}`;
+                                const txt = await _getDetail(name, item, index);
+                                markdown += txt;
+                            }
+                            markdown = imgs + markdown
+                            writeClipboardText(markdown);
+
+                        } catch (error) {
+                            Swal.showValidationMessage(`Request failed: ${error}`);
+                        }
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire("处理完毕，已写入剪切板");
+                    }
+                });
+
+            });
+        }
+        _init();
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     function loaded() {
         // 添加civarchive.com跳转按钮
