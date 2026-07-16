@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         civitai_tools
-// @version      0.1.6
+// @version      0.1.7
 // @namespace    https://github.com/love2wllw/scriptcat_scripts/
 // @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @description  my ScriptCat custom scripts
 // @author       ddLee
 // @include      https://civitai.*
+// @require      https://scriptcat.org/lib/2691/1.0.0/sweetalert2.all.min-11.15.10.js?sha384-O1kBn1fdY7JEyTHMP/0shbUTh839VvXxg1t758rE9xIUuofX+tobxkHuDyVrMwJK
 // @grant        none
 // @noframes
 // ==/UserScript==
@@ -20,6 +21,26 @@
     async function writeClipboardText(text) {
         try {
             await navigator.clipboard.writeText(text);
+
+            let timerInterval;
+            Swal.fire({
+                title: "复制成功!",
+                timer: 1000,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const timer = Swal.getPopup().querySelector("b");
+                    timerInterval = setInterval(() => {
+                        timer.textContent = `${Swal.getTimerLeft()}`;
+                    }, 100);
+                },
+                willClose: () => { clearInterval(timerInterval); }
+            }).then((result) => {
+                /* Read more about handling dismissals below */
+                /* if (result.dismiss === Swal.DismissReason.timer){
+                    console.log("I was closed by the timer");
+                } */
+            });
+
             return true;
         } catch (err) {
             console.error('写入剪贴板失败:', err);
@@ -54,8 +75,8 @@
     function add_post_detail() {
         const _addBtn = (p) => {
             const btn = document.createElement("p");
-            btn.setAttribute("style", "color:var(--mantine-color-blue-4)");
-            btn.setAttribute("class", "mantine-focus-auto flex cursor-pointer items-center gap-1 text-xs m_b6d8b162 mantine-Text-root");
+            btn.setAttribute("style", "color:var(--mantine-color-red-4)");
+            btn.setAttribute("class", "mantine-focus-auto flex cursor-pointer items-center gap-1 text-xs mantine-Text-root");
             btn.setAttribute("href", "javascript:;");
             btn.innerHTML = "<span>复制</span>";
             p.append(btn);
