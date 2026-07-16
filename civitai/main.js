@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         civitai_tools
-// @version      0.1.8
+// @version      0.1.9
 // @namespace    https://github.com/love2wllw/scriptcat_scripts/
 // @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
@@ -12,6 +12,7 @@
 // @noframes
 // ==/UserScript==
 
+/* global Swal */
 (function () {
     'use strict';
 
@@ -131,11 +132,33 @@
         }
     }
 
+    function getPostViewData() {
+        return [...document.querySelectorAll(`a.mantine-focus-auto.mantine-Text-root.mantine-Anchor-root`)]
+            .filter(x => /\/images\/\d+/i.test(x.href))
+            .map(x => {
+                let src = x.querySelector("img").src;
+                src = /\/\w+\/([\w-]+)\//i.exec(src)[1];
+                src = `https://image-b2.civitai.com/file/civitai-media-cache/${src}`;
+                return { href: x.href, src };
+            });
+    }
+    function add_btn_in_post_view() {
+        const wrap = [...document.querySelectorAll("button.mantine-Button-root.mantine-UnstyledButton-root[data-size='compact-md']")]
+            .find(x => x.innerText == "Save").parentElement;
+        const btn = document.createElement("button");
+        btn.setAttribute("style", "--button-height:var(--button-height-compact-md);--button-padding-x:var(--button-padding-x-compact-md);--button-fz:var(--mantine-font-size-md);--button-radius:var(--mantine-radius-xl);--button-bg:var(--mantine-color-gray-filled);--button-hover:var(--mantine-color-gray-filled-hover);--button-color:var(--mantine-color-white);--button-bd:calc(0.0625rem * var(--mantine-scale)) solid transparent");
+        btn.setAttribute("class", "mantine-focus-auto mantine-active mantine-Button-root mantine-UnstyledButton-root");
+        btn.innerHTML = "<span>保存数据</span>";
+        wrap.append(btn);
+    }
+
     function loaded() {
         // 添加civarchive.com跳转按钮
         /^\/models\/\d+\/?/.test(S_Path) && add_civarchive_button();
         // 示例详情页
         /^\/images\/\d+\/?/.test(S_Path) && add_post_detail();
+        // postview
+        /^\/posts\/\d+\/?/.test(S_Path) && add_btn_in_post_view();
     }
 
     if (["interactive", "complete"].includes(document.readyState)) {
