@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         civitai_tools
-// @version      0.1.7
+// @version      0.1.8
 // @namespace    https://github.com/love2wllw/scriptcat_scripts/
 // @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
 // @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/civitai/main.js
@@ -21,29 +21,10 @@
     async function writeClipboardText(text) {
         try {
             await navigator.clipboard.writeText(text);
-
-            let timerInterval;
-            Swal.fire({
-                title: "复制成功!",
-                timer: 1000,
-                didOpen: () => {
-                    Swal.showLoading();
-                    const timer = Swal.getPopup().querySelector("b");
-                    timerInterval = setInterval(() => {
-                        timer.textContent = `${Swal.getTimerLeft()}`;
-                    }, 100);
-                },
-                willClose: () => { clearInterval(timerInterval); }
-            }).then((result) => {
-                /* Read more about handling dismissals below */
-                /* if (result.dismiss === Swal.DismissReason.timer){
-                    console.log("I was closed by the timer");
-                } */
-            });
-
+            Swal.fire({ title: "复制成功", icon: "success" });
             return true;
         } catch (err) {
-            console.error('写入剪贴板失败:', err);
+            Swal.fire({ title: "复制失败", icon: "error" });
             return false;
         }
     }
@@ -145,7 +126,6 @@
                         });
                     }
                     writeClipboardText(resText);
-                    console.log(resText);
                 });
             }
         }
@@ -158,12 +138,10 @@
         /^\/images\/\d+\/?/.test(S_Path) && add_post_detail();
     }
 
-    loaded();
-    /*
     if (["interactive", "complete"].includes(document.readyState)) {
         loaded();
     } else {
         window.addEventListener("DOMContentLoaded", loaded);
     }
-    */
+
 })();
