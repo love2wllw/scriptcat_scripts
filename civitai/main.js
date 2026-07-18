@@ -17,7 +17,6 @@
  */
 
 /* global Swal */
-/* eslint no-unused-vars: warn */
 (function () {
     'use strict';
 

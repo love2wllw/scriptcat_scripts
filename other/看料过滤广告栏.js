@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         看料过滤广告栏
-// @namespace    https://bbs.tampermonkey.net.cn/
-// @version      0.1.2
-// @description  看料过滤广告栏
-// @author       Didi
+// @version      0.1.0
+// @namespace    https://github.com/love2wllw/scriptcat_scripts/
+// @updateURL    https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/other/看料过滤广告栏.js
+// @downloadURL  https://raw.githubusercontent.com/love2wllw/scriptcat_scripts/refs/heads/main/other/看料过滤广告栏.js
+// @description  my ScriptCat custom scripts
+// @author       ddLee
 // @match        https://kanliao*.*/*
 // @match        https://*.kanliao*.*/*
 // @exclude      https://kanliao*.*/archives/*
@@ -13,21 +15,14 @@
     'use strict';
 
     function removeAds() {
-        const articles = document.querySelectorAll("article");
-        const bans = [];
-        for (const art of articles) {
-            const hot = art.querySelector("h2.post-card-title div.wrap span.wraps");
-            const sub = art.querySelector("div.blog-background");
-            if (sub && sub.style.backgroundImage) {
-                const imgu = sub.style.backgroundImage;
-                if (imgu && (!/^url\("\//i.test(imgu) || /\.gif"\)/i.test(imgu) || hot)) {
-                    bans.push(art);
-                }
-            }
+        const predicate1 = (x) => x.querySelector("h2>div[class='wrap']>span[class='wraps']") !== undefined;
+        const predicate2 = (x) => [...x.querySelectorAll("div[class='post-card-info']>span")].some(x => x.innerText == "无分类");
+        const articles = [...document.querySelectorAll("article")].filter(x => predicate1(x) && predicate2(x));
+        for (let i = 0; i < articles.length; i++) {
+            articles[i].remove();
         }
-        bans.forEach((m) => { m.remove(); });
-        document.querySelector("div.blog-notice").remove();
-        document.querySelector("header#masthead").style.height = "60px";
+        //document.querySelector("div.blog-notice").remove();
+        //document.querySelector("header#masthead").style.height = "60px";
     }
     function windowLoaded() {
         removeAds();
